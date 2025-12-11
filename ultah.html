@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday Web</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #FFC0CB, #FFB6C1);
+    margin: 0;
+    padding: 0;
+    color: #333;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    position: relative;
+}
+
+/* Animasi Background: Partikel jatuh seperti bintang atau hati */
+@keyframes fall {
+    0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+}
+
+.particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #FF1493;
+    border-radius: 50%;
+    animation: fall linear infinite;
+    pointer-events: none;
+}
+
+.particle:nth-child(odd) {
+    background: #FFB6C1;
+    width: 15px;
+    height: 15px;
+}
+
+.particle:nth-child(3n) {
+    background: #FF69B4;
+    animation-duration: 8s;
+}
+
+.particle:nth-child(5n) {
+    animation-duration: 12s;
+}
+
+.main-container {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 10px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1; /* Above particles */
+}
+header {
+    text-align: center;
+    font-family: 'Pacifico', cursive;
+    font-size: 2em;
+    color: #FF1493;
+    text-shadow: 0 0 10px rgba(255,20,147,0.5);
+    margin-bottom: 15px;
+}
+.photo-section {
+    position: relative;
+    width: 100%;
+    padding-top: 100%; /* 1:1 ratio */
+    margin-bottom: 20px;
+}
+.photo-section .photo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px;
+    border: 5px solid #FFB6C1;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: opacity 1s;
+}
+.photo-section .photo.active {
+    opacity: 1;
+}
+.song-container {
+    background: #fff1f8;
+    padding: 10px 15px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.song-container .song-title {
+    margin: 0 0 5px 0;
+    font-family: 'Pacifico', cursive;
+    color: #FF1493;
+}
+.song-container .lyrics {
+    font-size: 1.1em;
+    line-height: 1.5;
+    color: #333;
+}
+.piano {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.key {
+    width: 12%;
+    height: 80px;
+    min-width: 40px;
+    background: linear-gradient(45deg, #FF69B4, #FFB6C1);
+    border: 2px solid #FF1493;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.key:active {
+    transform: scale(0.9);
+    background: #FF1493;
+    box-shadow: 0 0 10px rgba(255,20,147,0.8);
+}
+.key.correct {
+    background: #32CD32; /* Hijau untuk benar */
+    border-color: #228B22;
+}
+.key.wrong {
+    background: #FF4500; /* Merah untuk salah */
+    border-color: #DC143C;
+}
+.button-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+button {
+    width: 80%;
+    max-width: 300px;
+    padding: 12px 0;
+    font-size: 1em;
+    background: linear-gradient(45deg, #FF69B4, #FFB6C1);
+    border: none;
+    color: white;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+}
+button:hover {
+    transform: scale(1.05);
+}
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+.popup {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 20px;
+    border-radius: 20px;
+    z-index: 1000;
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+.popup.show {
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    transition: opacity 0.3s;
+}
+.music-controls {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1001;
+}
+.music-controls button {
+    font-size: 0.8em;
+    padding: 8px 12px;
+}
+.game-status {
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #FF1493;
+}
+@media (min-width: 769px) {
+    header { font-size: 3em; margin-bottom: 20px; }
+    .key { width: 50px; height: 150px; }
+    button { padding: 15px 0; font-size: 1.2em; }
+    .popup { max-width: 400px; padding: 20px; }
+}
+</style>
+</head>
+<body>
+<!-- Partikel untuk animasi background -->
+<div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+<div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+<div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+<div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+<div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+<div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+<div class="particle" style="left: 70%; animation-delay: 6s;"></div>
+<div class="particle" style="left: 80%; animation-delay: 7s;"></div>
+<div class="particle" style="left: 90%; animation-delay: 8s;"></div>
+<div class="particle" style="left: 15%; animation-delay: 9s;"></div>
+<div class="particle" style="left: 25%; animation-delay: 10s;"></div>
+<div class="particle" style="left: 35%; animation-delay: 11s;"></div>
+<div class="particle" style="left: 45%; animation-delay: 12s;"></div>
+<div class="particle" style="left: 55%; animation-delay: 13s;"></div>
+<div class="particle" style="left: 65%; animation-delay: 14s;"></div>
+<div class="particle" style="left: 75%; animation-delay: 15s;"></div>
+<div class="particle" style="left: 85%; animation-delay: 16s;"></div>
+<div class="particle" style="left: 95%; animation-delay: 17s;"></div>
+
+<div class="main-container">
+    <header>Happy Birthday Erlista Alfari Khanza🎉<br><small>Ulang Tahun ke-17</small></header>
+
+    <section class="photo-section">
+        <img class="photo" src="photo1.jpg" alt="Birthday Photo">
+        <img class="photo" src="photo2.jpg" alt="Birthday Photo">
+        <img class="photo" src="photo3.jpg" alt="Birthday Photo">
+    </section>
+
+    <div class="song-container">
+        <h3 class="song-title">Twinkle Twinkle Little Star 🌟</h3>
+        <div class="lyrics">
+            1 1 5 5 6 6 5 <br>
+            4 4 3 3 2 2 1
+        </div>
+    </div>
+
+    <div class="game-status" id="gameStatus">Mainkan piano sesuai nada untuk membuka ucapan!</div>
+
+    <div class="piano">
+        <div class="key" data-note="C">1</div>
+        <div class="key" data-note="D">2</div>
+        <div class="key" data-note="E">3</div>
+        <div class="key" data-note="F">4</div>
+        <div class="key" data-note="G">5</div>
+        <div class="key" data-note="A">6</div>
+    </div>
+
+    <section class="button-section">
+        <button id="wishesButton" onclick="showPopup()" disabled>Ucapan Selamat</button>
+    </section>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="popup" id="popup">
+    <h2>🎉 Selamat Ulang Tahun Khanza! 🎂</h2>
+    <img src="photo4.jpg" alt="Foto Kotak" style="width: 100%; height: auto; border-radius: 10px; margin-bottom: 15px; border: 2px solid #FFB6C1;">
+    <p>Happy birthday, Zaza! Semoga tahun ini kamu makin cantik, rejekinya lancar terus, semua impianmu kebaca, dan lebih banyak kebahagiaan yang mampir. Semoga panjang umur, sehat selalu, dan selalu dikelilingi orang-orang yang bikin kamu senyum tiap hari. Semoga tahun ini jadi tahun paling seru dan berkesan buat kamu! 🎉💖 (fotonya ulah raffa)
+</p>
+    <button onclick="closePopup()">Tutup</button>
+</div>
+
+<div class="music-controls">
+    <button id="playMusic">▶️ Play Musik</button>
+    <audio id="happyBirthdayAudio" src="happy_birthday.mp3"></audio>
+    <button id="pauseMusic" style="display:none;">⏸️ Pause Musik</button>
+</div>
+
+<script>
+// Slideshow foto
+const photos = document.querySelectorAll('.photo-section .photo');
+let index = 0;
+photos[index].classList.add('active');
+setInterval(() => {
+    photos[index].classList.remove('active');
+    index = (index + 1) % photos.length;
+    photos[index].classList.add('active');
+}, 2000);
+
+// Virtual Piano dan Mini Game
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const notes = { C:261.63, D:293.66, E:329.63, F:349.23, G:392.00, A:440.00 };
+const song = ['C', 'C', 'G', 'G', 'A', 'A', 'G', 'F', 'F', 'E', 'E', 'D', 'D', 'C']; // Urutan lagu
+let currentIndex = 0;
+const wishesButton = document.getElementById('wishesButton');
+const gameStatus = document.getElementById('gameStatus');
+
+document.querySelectorAll('.key').forEach(key => {
+    key.addEventListener('click', () => {
+        const note = key.dataset.note;
+        playNote(notes[note]);
+        
+        // Cek jika note benar
+        if (note === song[currentIndex]) {
+            key.classList.add('correct');
+            setTimeout(() => key.classList.remove('correct'), 500);
+            currentIndex++;
+            if (currentIndex === song.length) {
+                // Selesai, aktifkan tombol
+                wishesButton.disabled = false;
+                gameStatus.textContent = "Selamat! Kamu berhasil! Sekarang buka ucapanmu.";
+                gameStatus.style.color = "#32CD32";
+            } else {
+                gameStatus.textContent = `Benar! Lanjutkan... (${currentIndex}/${song.length})`;
+            }
+        } else {
+            // Salah, reset
+            key.classList.add('wrong');
+            setTimeout(() => key.classList.remove('wrong'), 500);
+            currentIndex = 0;
+            gameStatus.textContent = "Salah! Mulai lagi dari awal.";
+            gameStatus.style.color = "#FF4500";
+        }
+    });
+});
+
+function playNote(frequency) {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+}
+
+// Musik background
+let musicPlaying = false;
+let musicAudio = document.getElementById('happyBirthdayAudio');
+document.getElementById('playMusic').addEventListener('click', () => {
+    if (!musicPlaying) {
+        musicAudio.currentTime = 0;
+        musicAudio.play();
+        musicPlaying = true;
+        document.getElementById('playMusic').style.display = 'none';
+        document.getElementById('pauseMusic').style.display = 'inline';
+    }
+});
+document.getElementById('pauseMusic').addEventListener('click', () => {
+    if (musicPlaying) {
+        musicAudio.pause();
+        musicPlaying = false;
+        document.getElementById('playMusic').style.display = 'inline';
+        document.getElementById('pauseMusic').style.display = 'none';
+    }
+});
+
+// Popup
+function showPopup() {
+    document.getElementById('overlay').style.display = 'block';
+    const popup = document.getElementById('popup');
+    popup.style.display = 'block';
+    setTimeout(() => popup.classList.add('show'), 10);
+}
+function closePopup() {
+    const popup = document.getElementById('popup');
+    popup.classList.remove('show');
+    setTimeout(() => {
+        popup.style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
+    }, 500);
+}
+</script>
+</body>
+</html>
